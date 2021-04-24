@@ -19,13 +19,13 @@
 #include <tuple>
 using namespace std;
 
-const string space = "\n\t\r\v\f";      // Whitespace characters for parsing the input file
+const string whitespace = "\n\t\r\v\f";      // Whitespace characters for parsing the input file
 
-vector<tuple<int, int, int>> jobs; 
+vector<tuple<string, int, int>> jobs; 
 
 vector<int> getIntFromString(string s)
 {
-    string number = s.substr(0, s.find(space)); // Only use the beginning of the line until whitespace is found
+    string number = s.substr(0, s.find(whitespace)); // Only use the beginning of the line until whitespace is found
     try
     {
         // Convert string to int
@@ -51,32 +51,56 @@ void populateJobs(string fileName)
         while(getline(file, input))
         {
             int count = 0;
+            int index = 0;
             string entry = "";
             vector<string> line;
 
             for(char c : input)
             {
+                //cout << "1 -- c: " << c << endl;
                 if(count < 3) // Each line should have 3 elements we need to keep track of
                 {
-                    if(space.find(c)) // Check if the current char is a whitespace
+                    //cout << "2" << endl;
+                    if(whitespace.find(c) != string::npos) // Check if the current char is a whitespace
                     {
+                        //cout << "3" << endl;
                         if(entry != "") // If entry contains something, this whitespace is the end of the entry
                         {
+                            //cout << "4" << endl;
                             line.push_back(entry);
                             count++;
                             entry = "";
                         }
                     }
+                    //else if(input.substr(index, input.size()).find(c) == input.size() - 1)  // THIS IS ALWAYS GOING TO FIND IT AT THE BEGINNING OF THE SUBSTRING, WE JUST NEED THE LAST OCCURRENCE
+                    else if(input.find_last_of(c) == input.size() - 1)
+                    {
+                        //cout << "7" << endl;
+                        entry = entry + c;
+                        line.push_back(entry);
+                        count++;
+                        entry = "";
+                    }
                     else // Add non-whitespace characters to the entry
                     {
+                        //cout << "5" << endl;
                         entry = entry + c;
                     }
+
+                    //cout << "c at end of string: " << input.find(c) << endl;
                 }
+                //cout << "input.substr(index, input.size()).find(c) " << input.substr(index, input.size()).find(c) << endl;
+                index++;
             }
 
-            if(line.count == 3)
+            //cout << "line size: " << line.size() << endl;
+            if(line.size() == 3)
             {
-                jobs.push_back(make_tuple(line[0], getIntFromString(line[1]), getIntFromString(line[2])));
+                //cout << "6" << endl;
+                tuple <string, int, int> job;
+                job = make_tuple(line[0], stoi(line[1]), stoi(line[2]));
+                //job = make_tuple(line[0], getIntFromString(line[1]), getIntFromString(line[2]));
+                jobs.push_back(job);
             }
 
             //if(input.substr(0, 1) == ".")
@@ -85,7 +109,18 @@ void populateJobs(string fileName)
             //    throw out_of_range(errorMessage);
             //    exit(-1);
             //}
+            //cout << "count: " << count << endl;
         }
+
+        cout << "jobs size: " << jobs.size() << endl;
+
+        for(auto job : jobs)
+        {
+            cout << "job num elements: " << tuple_size<decltype(job)>::value << endl;
+            //printf(get<0>(job), "\n");
+            cout << get<0>(job) << " " << get<1>(job) << " " << get<2>(job) << endl;
+        }
+
         file.close();
     }
     else
