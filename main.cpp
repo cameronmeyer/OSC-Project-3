@@ -156,7 +156,6 @@ void spn()
 
     sort(spnJobs.begin(), spnJobs.end(), sortDuration);
 
-    //int completedJobs = 0;
     while(spnJobs.size() > 0)
     {
         int index = 0;
@@ -166,10 +165,6 @@ void spn()
 
         for(int i = 0; i < spnJobs.size(); i++)
         {
-            //if(get<1>(spnJobs[i]) > time) { 
-            //    cout << "job " << get<0>(spnJobs[i]) << " at time " << time << " is breaking" << endl;
-            //    break; }
-
             int tempR = ((time - get<1>(spnJobs[i])) + get<2>(spnJobs[i])) / get<2>(spnJobs[i]);
             if(r < tempR)
             {
@@ -180,10 +175,7 @@ void spn()
             }
         }
 
-        cout << "running: " << running << endl;
-        //cout << "size before erase: " << spnJobs.size() << endl;
         spnJobs.erase(spnJobs.begin() + index);
-        //cout << "size after erase: " << spnJobs.size() << endl;
         time += runDuration;
 
         for(auto job : jobs)
@@ -195,12 +187,57 @@ void spn()
             }
             jobIndex++;
         }
-        //completedJobs++;
-
-        //if(completedJobs >= jobs.size()) { break; }
     }
 
     printSchedule("SPN", schedule);
+    cout << endl << endl;
+}
+
+void hrrn()
+{
+    vector<tuple<string, int, int>> hrrnJobs = jobs;
+    vector<string> schedule;
+    string running = "";
+    int time = 0;
+
+    for(auto job : jobs) { schedule.push_back(""); }
+
+    while(hrrnJobs.size() > 0)
+    {
+        int index = 0;
+        int r = 0;
+        int jobIndex = 0;
+        int runDuration = 0;
+
+        for(int i = 0; i < hrrnJobs.size(); i++)
+        {
+            if(get<1>(hrrnJobs[i]) > time) { break; }
+
+            int tempR = ((time - get<1>(hrrnJobs[i])) + get<2>(hrrnJobs[i])) / get<2>(hrrnJobs[i]);
+            if(r < tempR)
+            {
+                r = tempR;
+                running = get<0>(hrrnJobs[i]);
+                runDuration = get<2>(hrrnJobs[i]);
+                index = i;
+            }
+        }
+
+        hrrnJobs.erase(hrrnJobs.begin() + index);
+        time += runDuration;
+
+        for(auto job : jobs)
+        {
+            for(int i = 0; i < runDuration; i++)
+            {
+                if(running == get<0>(job)) { schedule[jobIndex] += "X"; }
+                else { schedule[jobIndex] += " "; }
+            }
+            jobIndex++;
+        }
+    }
+
+    printSchedule("HRRN", schedule);
     cout << endl << endl;
 }
 
@@ -213,6 +250,6 @@ int main(int argc, char *argv[])
 
         fcfs();
         spn();
-        //hrrn();
+        hrrn();
     }
 }
