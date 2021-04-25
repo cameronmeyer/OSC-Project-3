@@ -159,19 +159,17 @@ void spn()
     while(spnJobs.size() > 0)
     {
         int index = 0;
-        int r = 0;
         int jobIndex = 0;
         int runDuration = 0;
 
         for(int i = 0; i < spnJobs.size(); i++)
         {
-            int tempR = ((time - get<1>(spnJobs[i])) + get<2>(spnJobs[i])) / get<2>(spnJobs[i]);
-            if(r < tempR)
+            if(get<1>(spnJobs[i]) <= time)
             {
-                r = tempR;
                 running = get<0>(spnJobs[i]);
                 runDuration = get<2>(spnJobs[i]);
                 index = i;
+                break;
             }
         }
 
