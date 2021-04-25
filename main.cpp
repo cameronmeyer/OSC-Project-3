@@ -18,7 +18,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-const string whitespace = "\n\t\r\v\f"; // Whitespace characters for parsing the input file
+const string space = "\n\t\r\v\f"; // Whitespace characters for parsing the input file
 
 vector<tuple<string, int, int>> jobs; 
 
@@ -47,7 +47,7 @@ void populateJobs(string fileName)
             {
                 if(count < 3) // Each line should have 3 elements we need to keep track of
                 {
-                    if(whitespace.find(c) != string::npos) // Check if the current char is a whitespace
+                    if(space.find(c) != string::npos) // Check if the current char is a whitespace
                     {
                         if(entry != "") // If entry contains something, this whitespace marks the end of the entry
                         {
@@ -77,14 +77,6 @@ void populateJobs(string fileName)
                 job = make_tuple(line[0], stoi(line[1]), stoi(line[2]));
                 jobs.push_back(job);
             }
-        }
-
-        //cout << "jobs size: " << jobs.size() << endl;
-
-        for(auto job : jobs)
-        {
-            //cout << "job num elements: " << tuple_size<decltype(job)>::value << endl;
-            cout << get<0>(job) << " " << get<1>(job) << " " << get<2>(job) << endl;
         }
 
         file.close();
@@ -236,7 +228,6 @@ void hrrn()
     }
 
     printSchedule("HRRN", schedule);
-    cout << endl << endl;
 }
 
 int main(int argc, char *argv[])
