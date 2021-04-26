@@ -3,9 +3,7 @@
 // CS 4348.001
 
 
-#include <stack>
 #include <string>
-#include <fstream>
 #include <vector>
 #include <stdio.h>
 #include <iostream>
@@ -18,10 +16,11 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-const string space = "\n\t\r\v\f"; // Whitespace characters for parsing the input file
+const string space = "\n\t\r\v\f "; // Whitespace characters for parsing the input file
 
 vector<tuple<string, int, int>> jobs; 
 
+// Custom sorting functionality to sort a vector of jobs based on duration of the job
 bool sortDuration(const tuple<string, int, int>& a, const tuple<string, int, int>& b)
 {
     return (get<2>(a) < get<2>(b));
@@ -71,6 +70,7 @@ void populateJobs(string fileName)
                 index++;
             }
 
+            // When all elements are accounted for, create a tuple for this job
             if(line.size() == 3)
             {
                 tuple <string, int, int> job;
@@ -112,12 +112,30 @@ void fcfs()
     for(auto job : jobs) { schedule.push_back(""); }
 
     int completedJobs = 0;
+    int time = 0;
     while(true)
     {
         int jobIndex = 0;
+        int runDuration = 0;
+        running = "";
 
-        int runDuration = get<2>(jobs[completedJobs]);
-        running = get<0>(jobs[completedJobs]);
+        // Ensure the job has arrived before running it
+        if(get<1>(jobs[completedJobs]) <= time)
+        {
+            // Run the next job in the list
+            runDuration = get<2>(jobs[completedJobs]);
+            running = get<0>(jobs[completedJobs]);
+        }
+        else
+        {
+            // Don't run anything if the job hasn't arrived
+            runDuration = 1;
+            completedJobs--;
+
+            if(completedJobs < 0) { completedJobs = 0; }
+        }
+
+        time += runDuration;
 
         for(auto job : jobs)
         {
@@ -130,6 +148,7 @@ void fcfs()
         }
         completedJobs++;
 
+        // Exit once all jobs have been run
         if(completedJobs >= jobs.size()) { break; }
     }
 
@@ -146,6 +165,7 @@ void spn()
 
     for(auto job : jobs) { schedule.push_back(""); }
 
+    // Sorts the copied list of jobs based on their run duration
     sort(spnJobs.begin(), spnJobs.end(), sortDuration);
 
     while(spnJobs.size() > 0)
@@ -153,9 +173,11 @@ void spn()
         int index = 0;
         int jobIndex = 0;
         int runDuration = 0;
+        running = "";
 
         for(int i = 0; i < spnJobs.size(); i++)
         {
+            // Ensure a job has arrived before running it
             if(get<1>(spnJobs[i]) <= time)
             {
                 running = get<0>(spnJobs[i]);
@@ -165,7 +187,10 @@ void spn()
             }
         }
 
-        spnJobs.erase(spnJobs.begin() + index);
+        // Erase the running job from the list if applicable
+        if(running == "") { runDuration = 1; }
+        else { spnJobs.erase(spnJobs.begin() + index); } 
+
         time += runDuration;
 
         for(auto job : jobs)
@@ -198,14 +223,18 @@ void hrrn()
         int r = 0;
         int jobIndex = 0;
         int runDuration = 0;
+        running = "";
 
         for(int i = 0; i < hrrnJobs.size(); i++)
         {
+            // Ensure a job has arrived before running it
             if(get<1>(hrrnJobs[i]) > time) { break; }
 
+            // Calculate the response ratio for this job and compare against the current highest value
             int tempR = ((time - get<1>(hrrnJobs[i])) + get<2>(hrrnJobs[i])) / get<2>(hrrnJobs[i]);
             if(r < tempR)
             {
+                // Prepare to run the job with the highest response ratio next
                 r = tempR;
                 running = get<0>(hrrnJobs[i]);
                 runDuration = get<2>(hrrnJobs[i]);
@@ -213,7 +242,10 @@ void hrrn()
             }
         }
 
-        hrrnJobs.erase(hrrnJobs.begin() + index);
+        // Erase the running job from the list if applicable
+        if(running == "") { runDuration = 1; }
+        else { hrrnJobs.erase(hrrnJobs.begin() + index); }
+
         time += runDuration;
 
         for(auto job : jobs)
@@ -237,6 +269,7 @@ int main(int argc, char *argv[])
         // Populate jobs vector with contents from input file
         populateJobs(argv[1]);
 
+        // Run the necessary scheduling algorithms
         fcfs();
         spn();
         hrrn();
